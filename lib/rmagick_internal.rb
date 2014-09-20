@@ -16,6 +16,15 @@ module Magick
     @exit_block_set_up = nil
 
 class << self
+    def const_missing(const_name)
+      old_const = [:MaxRGB, :QuantumDepth]
+      new_const = [:QuantumRange, :MAGICKCORE_QUANTUM_DEPTH]
+      super unless index = old_const.index(const_name)
+
+      warn "#{old_const[index]} has been deprecated. Please use #{new_const[index]}"
+      const_get(new_const[index])
+    end
+
     def formats(&block)
        @formats ||= init_formats()
        if block_given?

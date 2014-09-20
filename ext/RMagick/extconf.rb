@@ -46,6 +46,19 @@ def exit_failure(msg)
 end
 
 
+def set_imagemagick_path_for_mingw()
+  path = ENV['PATH'].split(File::PATH_SEPARATOR)
+  path.each do |dir|
+    lib = File.join(dir, "lib")
+    lib_file = File.join(lib, "CORE_RL_magick_.lib")
+    if File.exists?(lib_file)
+      include = File.join(dir, "include")
+      $CPPFLAGS = %Q{-I"#{include}"}
+      $LDFLAGS = %Q{-L"#{lib}"}
+      break
+    end
+  end
+end
 
 
 # Seems like lots of people have multiple versions of ImageMagick installed.
@@ -164,6 +177,7 @@ elsif RUBY_PLATFORM =~ /mingw/  # mingw
   `convert -version` =~ /Version: ImageMagick (\d+\.\d+\.\d+)-\d+ /
   abort "Unable to get ImageMagick version" unless $1
   $magick_version = $1
+  set_imagemagick_path_for_mingw()
   if RUBY_PLATFORM =~ /x64/
     $LOCAL_LIBS = '-lCORE_RL_magick_'
   else
